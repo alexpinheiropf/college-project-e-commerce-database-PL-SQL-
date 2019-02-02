@@ -1,0 +1,28 @@
+CREATE OR REPLACE FUNCTION total_produtos_enviados (in_data_entrega IN DATE)
+RETURN NUMBER
+AS
+ v_data_atual DATE DEFAULT SYSDATE;
+ v_quantidade NUMBER;
+BEGIN
+
+  if in_data_entrega > v_data_atual THEN
+    raise_application_error(-20000,'Data informada Maior que dia Atual');
+	end if;select pp.quantidade into v_quantidade
+    from produto pr, produto_pedido pp
+    where exists(
+        select * 
+        from pedido p
+        where pr.cod_produto = pp.cod_produto
+          AND pr.cod_produto = p.cod_produto
+          AND p.cod_pedido = pp.cod_pedido
+          AND p.data_entrega <= in_data_entrega
+    );
+
+  return v_quantidade; 
+  
+END;
+ 
+  
+  
+
+SELECT total_produtos_enviados(to_date('2016/09/20', 'yyyy/mm/dd')) FROM DUAL;
